@@ -8,18 +8,7 @@
 #pragma once
 
 typedef struct GameWorld {
-    
-    int rows;
-    int cols;
-
-    // frame buffers
-    int *gridFrame1;
-    int *gridFrame2;
-
-    float *gridFrameVels;
-    
-    int *currentGridFrame;
-
+    int dummy;
 } GameWorld;
 
 /**
