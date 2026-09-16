@@ -52,9 +52,9 @@ void updateCell( Cell *grid, int row, int col, int rows, int cols ) {
 
     Cell *cell = &grid[row * cols + col];
 
-    if ( cell->type != CELL_TYPE_EMPTY ) {
-        updateTable[cell->type]( grid, row, col, rows, cols );
+    if ( cell->type != CELL_TYPE_EMPTY && !cell->updated ) {
         cell->updated = true;
+        updateTable[cell->type]( grid, row, col, rows, cols );
     }
 
 }
