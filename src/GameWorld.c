@@ -36,7 +36,7 @@ GameWorld *createGameWorld( void ) {
     int size = 80;
     for ( int i = 200; i < 200 + size; i++ ) {
 
-        int m = gw->cols / 2 - size * 5 / 2;
+        int m = 40;
 
         for ( int j = 0; j < size; j++ ) {
 
@@ -79,7 +79,7 @@ void destroyGameWorld( GameWorld *gw ) {
 void updateGameWorld( GameWorld *gw, float delta ) {
 
     resetCells( gw->grid, gw->rows, gw->cols );
-    
+
     for ( int row = gw->rows - 1; row >= 0; row-- ) {
 
         if ( GetRandomValue( 0, 1 ) == 0 ) {

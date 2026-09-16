@@ -13,7 +13,11 @@ static void updateStone( Cell *grid, int row, int col, int rows, int cols );
 static bool moveLeft( Cell *grid, int row, int col, int rows, int cols );
 static bool moveRight( Cell *grid, int row, int col, int rows, int cols );
 static bool moveUp( Cell *grid, int row, int col, int rows, int cols );
+static bool moveUpLeft( Cell *grid, int row, int col, int rows, int cols );
+static bool moveUpRight( Cell *grid, int row, int col, int rows, int cols );
 static bool moveDown( Cell *grid, int row, int col, int rows, int cols );
+static bool moveDownLeft( Cell *grid, int row, int col, int rows, int cols );
+static bool moveDownRight( Cell *grid, int row, int col, int rows, int cols );
 
 static void swapCell( Cell *grid, int pos1, int pos2 );
 static bool isCellPositionValid( int row, int col, int rows, int cols );
@@ -74,15 +78,29 @@ static void updateSand( Cell *grid, int row, int col, int rows, int cols ) {
     if ( moveDown( grid, row, col, rows, cols ) ) return;
 
     if ( GetRandomValue( 0, 1 ) == 0 ) {
-        if ( moveLeft( grid, row, col, rows, cols ) ) return;
+        if ( moveDownLeft( grid, row, col, rows, cols ) ) return;
     } else {
-        if ( moveRight( grid, row, col, rows, cols ) ) return;
+        if ( moveDownRight( grid, row, col, rows, cols ) ) return;
     }
     
 }
 
 static void updateWater( Cell *grid, int row, int col, int rows, int cols ) {
-    updateSand( grid, row, col, rows, cols );
+    
+    if ( moveDown( grid, row, col, rows, cols ) ) return;
+
+    if ( GetRandomValue( 0, 1 ) == 0 ) {
+        if ( moveDownLeft( grid, row, col, rows, cols ) ) return;
+    } else {
+        if ( moveDownRight( grid, row, col, rows, cols ) ) return;
+    }
+
+    if ( GetRandomValue( 0, 1 ) == 0 ) {
+        if ( moveLeft( grid, row, col, rows, cols ) ) return;
+    } else {
+        if ( moveRight( grid, row, col, rows, cols ) ) return;
+    }
+
 }
 
 static void updateFire( Cell *grid, int row, int col, int rows, int cols ) {
@@ -94,7 +112,7 @@ static void updateSmoke( Cell *grid, int row, int col, int rows, int cols ) {
 }
 
 static void updateStone( Cell *grid, int row, int col, int rows, int cols ) {
-    updateSand( grid, row, col, rows, cols );
+    // don't do anything!
 }
 
 static bool moveLeft( Cell *grid, int row, int col, int rows, int cols ) {
@@ -153,12 +171,88 @@ static bool moveUp( Cell *grid, int row, int col, int rows, int cols ) {
 
 }
 
+static bool moveUpLeft( Cell *grid, int row, int col, int rows, int cols ) {
+
+    int pos = row * cols + col;
+    
+    int nRow = row - 1;
+    int nCol = col - 1;
+    int nPos = nRow * cols + nCol;
+
+    if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
+        if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
+            swapCell( grid, pos, nPos );
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+static bool moveUpRight( Cell *grid, int row, int col, int rows, int cols ) {
+
+    int pos = row * cols + col;
+    
+    int nRow = row - 1;
+    int nCol = col + 1;
+    int nPos = nRow * cols + nCol;
+
+    if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
+        if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
+            swapCell( grid, pos, nPos );
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
 static bool moveDown( Cell *grid, int row, int col, int rows, int cols ) {
 
     int pos = row * cols + col;
 
     int nRow = row + 1;
     int nCol = col;
+    int nPos = nRow * cols + nCol;
+
+    if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
+        if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
+            swapCell( grid, pos, nPos );
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+static bool moveDownLeft( Cell *grid, int row, int col, int rows, int cols ) {
+
+    int pos = row * cols + col;
+    
+    int nRow = row + 1;
+    int nCol = col - 1;
+    int nPos = nRow * cols + nCol;
+
+    if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
+        if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
+            swapCell( grid, pos, nPos );
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+static bool moveDownRight( Cell *grid, int row, int col, int rows, int cols ) {
+
+    int pos = row * cols + col;
+    
+    int nRow = row + 1;
+    int nCol = col + 1;
     int nPos = nRow * cols + nCol;
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
@@ -183,7 +277,7 @@ static bool isCellPositionValid( int row, int col, int rows, int cols ) {
 }
 
 static void drawSand( int row, int col ) {
-    DrawPixel( col, row, BEIGE );
+    DrawPixel( col, row, ORANGE );
 }
 
 static void drawWater( int row, int col ) {
@@ -195,7 +289,7 @@ static void drawFire( int row, int col ) {
 }
 
 static void drawSmoke( int row, int col ) {
-    DrawPixel( col, row, GRAY );
+    DrawPixel( col, row, LIGHTGRAY );
 }
 
 static void drawStone( int row, int col ) {
