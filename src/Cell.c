@@ -108,7 +108,23 @@ static void updateFire( Cell *grid, int row, int col, int rows, int cols ) {
 }
 
 static void updateSmoke( Cell *grid, int row, int col, int rows, int cols ) {
-    updateSand( grid, row, col, rows, cols );
+    
+    Cell *cell = &grid[row * cols + col];
+    cell->life--;
+
+    if ( cell->life == 0 ) {
+        cell->type = CELL_TYPE_EMPTY;
+        return;
+    }
+
+    if ( moveUp( grid, row, col, rows, cols ) ) return;
+
+    if ( GetRandomValue( 0, 1 ) == 0 ) {
+        if ( moveUpLeft( grid, row, col, rows, cols ) ) return;
+    } else {
+        if ( moveUpRight( grid, row, col, rows, cols ) ) return;
+    }
+
 }
 
 static void updateStone( Cell *grid, int row, int col, int rows, int cols ) {

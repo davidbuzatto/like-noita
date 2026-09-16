@@ -51,6 +51,7 @@ GameWorld *createGameWorld( void ) {
 
             pos += size * 2;
             gw->grid[pos].type = CELL_TYPE_SMOKE;
+            gw->grid[pos].life = GetRandomValue( 150, 400 );
 
             pos += size * 2;
             gw->grid[pos].type = CELL_TYPE_STONE;
@@ -93,6 +94,7 @@ void updateGameWorld( GameWorld *gw, float delta ) {
         }
 
     }
+
 }
 
 /**
