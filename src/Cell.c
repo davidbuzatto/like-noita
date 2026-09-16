@@ -22,11 +22,11 @@ static bool moveDownRight( Cell *grid, int row, int col, int rows, int cols );
 static void swapCell( Cell *grid, int pos1, int pos2 );
 static bool isCellPositionValid( int row, int col, int rows, int cols );
 
-static void drawSand( int row, int col );
-static void drawWater( int row, int col );
-static void drawFire( int row, int col );
-static void drawSmoke( int row, int col );
-static void drawStone( int row, int col );
+static void drawSand( Cell *cell, int row, int col );
+static void drawWater( Cell *cell, int row, int col );
+static void drawFire( Cell *cell, int row, int col );
+static void drawSmoke( Cell *cell, int row, int col );
+static void drawStone( Cell *cell, int row, int col );
 
 static CellUpdateFuncion updateTable[] = {
     [CELL_TYPE_SAND]  = updateSand,
@@ -42,6 +42,10 @@ static CellDrawFuncion drawTable[] = {
     [CELL_TYPE_FIRE]  = drawFire,
     [CELL_TYPE_SMOKE] = drawSmoke,
     [CELL_TYPE_STONE] = drawStone,
+};
+
+static CellMoveFuncion smokeMoveTable[] = {
+    moveUp, moveUpLeft, moveUpRight, moveLeft, moveRight
 };
 
 void resetCells( Cell *grid, int rows, int cols ) {
@@ -68,7 +72,7 @@ void drawCell( Cell *grid, int row, int col, int rows, int cols ) {
     Cell *cell = &grid[row * cols + col];
 
     if ( cell->type != CELL_TYPE_EMPTY ) {
-        drawTable[cell->type]( row, col );
+        drawTable[cell->type]( cell, row, col );
     }
 
 }
@@ -111,6 +115,7 @@ static void updateFire( Cell *grid, int row, int col, int rows, int cols ) {
     if ( cell->life <= 0 ) {
         cell->type = CELL_TYPE_SMOKE;
         cell->life = GetRandomValue( 150, 400 );
+        cell->brightness = GetRandomValue( -15, 15 );
         return;
     }
 
@@ -121,23 +126,27 @@ static void updateSmoke( Cell *grid, int row, int col, int rows, int cols ) {
     Cell *cell = &grid[row * cols + col];
     cell->life--;
 
-    if ( cell->life == 0 ) {
+    if ( cell->life <= 0 ) {
         cell->type = CELL_TYPE_EMPTY;
         return;
     }
 
-    if ( moveUp( grid, row, col, rows, cols ) ) return;
+    // shuffles move table (Fisher-Yates)
+    for ( int i = 4; i > 0; i-- ) {
+        int j = GetRandomValue( 0, i );
+        CellMoveFuncion t = smokeMoveTable[i];
+        smokeMoveTable[i] = smokeMoveTable[j];
+        smokeMoveTable[j] = t;
+    }
 
-    if ( GetRandomValue( 0, 1 ) == 0 ) {
-        if ( moveUpLeft( grid, row, col, rows, cols ) ) return;
-    } else {
-        if ( moveUpRight( grid, row, col, rows, cols ) ) return;
+    for ( int i = 0; i < 5; i++ ) {
+        if ( smokeMoveTable[i]( grid, row, col, rows, cols ) ) return;
     }
 
 }
 
 static void updateStone( Cell *grid, int row, int col, int rows, int cols ) {
-    // don't do anything!
+    // do nothing!
 }
 
 static bool moveLeft( Cell *grid, int row, int col, int rows, int cols ) {
@@ -301,22 +310,22 @@ static bool isCellPositionValid( int row, int col, int rows, int cols ) {
     return row >= 0 && row < rows && col >= 0 && col < cols;
 }
 
-static void drawSand( int row, int col ) {
-    DrawPixel( col, row, ORANGE );
+static void drawSand( Cell *cell, int row, int col ) {
+    DrawPixel( col, row, ColorBrightness( ORANGE, cell->brightness / 100.0f ) );
 }
 
-static void drawWater( int row, int col ) {
-    DrawPixel( col, row, BLUE );
+static void drawWater( Cell *cell, int row, int col ) {
+    DrawPixel( col, row, ColorBrightness( BLUE, cell->brightness / 100.0f ) );
 }
 
-static void drawFire( int row, int col ) {
-    DrawPixel( col, row, RED );
+static void drawFire( Cell *cell, int row, int col ) {
+    DrawPixel( col, row, ColorBrightness( RED, cell->brightness / 100.0f ) );
 }
 
-static void drawSmoke( int row, int col ) {
-    DrawPixel( col, row, LIGHTGRAY );
+static void drawSmoke( Cell *cell, int row, int col ) {
+    DrawPixel( col, row, ColorBrightness( LIGHTGRAY, cell->brightness / 100.0f ) );
 }
 
-static void drawStone( int row, int col ) {
-    DrawPixel( col, row, DARKGRAY );
+static void drawStone( Cell *cell, int row, int col ) {
+    DrawPixel( col, row, ColorBrightness( DARKGRAY, cell->brightness / 100.0f ) );
 }

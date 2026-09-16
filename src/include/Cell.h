@@ -22,7 +22,8 @@ typedef struct Cell {
 } Cell;
 
 typedef void (*CellUpdateFuncion)( Cell *grid, int row, int col, int rows, int cols );
-typedef void (*CellDrawFuncion)( int row, int col );
+typedef void (*CellDrawFuncion)( Cell *cell, int row, int col );
+typedef bool (*CellMoveFuncion)( Cell *grid, int row, int col, int rows, int cols );
 
 void resetCells( Cell *grid, int rows, int cols );
 void updateCell( Cell *grid, int row, int col, int rows, int cols );
