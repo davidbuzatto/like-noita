@@ -48,6 +48,7 @@ GameWorld *createGameWorld( void ) {
 
             pos += size * 2;
             gw->grid[pos].type = CELL_TYPE_FIRE;
+            gw->grid[pos].life = GetRandomValue( 200, 500 );
 
             pos += size * 2;
             gw->grid[pos].type = CELL_TYPE_SMOKE;

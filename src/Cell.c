@@ -104,7 +104,16 @@ static void updateWater( Cell *grid, int row, int col, int rows, int cols ) {
 }
 
 static void updateFire( Cell *grid, int row, int col, int rows, int cols ) {
-    updateSand( grid, row, col, rows, cols );
+    
+    Cell *cell = &grid[row * cols + col];
+    cell->life--;
+
+    if ( cell->life <= 0 ) {
+        cell->type = CELL_TYPE_SMOKE;
+        cell->life = GetRandomValue( 150, 400 );
+        return;
+    }
+
 }
 
 static void updateSmoke( Cell *grid, int row, int col, int rows, int cols ) {
