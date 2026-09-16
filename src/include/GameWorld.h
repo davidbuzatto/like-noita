@@ -7,8 +7,12 @@
  */
 #pragma once
 
+#include "Cell.h"
+
 typedef struct GameWorld {
-    int dummy;
+    int rows;
+    int cols;
+    Cell *grid;
 } GameWorld;
 
 /**
