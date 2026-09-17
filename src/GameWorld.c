@@ -186,6 +186,7 @@ static void handleMouseInput( GameWorld *gw ) {
 
             if ( gw->selectedType == CELL_TYPE_EMPTY ) {
                 gw->grid[pos].type = CELL_TYPE_EMPTY;
+                wakeNeighbors( gw->grid, row, col, gw->rows, gw->cols );
                 continue;
             }
 
@@ -195,6 +196,7 @@ static void handleMouseInput( GameWorld *gw ) {
             }
 
             spawnCell( &gw->grid[pos], gw->selectedType );
+            wakeNeighbors( gw->grid, row, col, gw->rows, gw->cols );
 
         }
 
@@ -211,11 +213,11 @@ static void drawHud( GameWorld *gw ) {
 
     switch ( gw->selectedType ) {
         case 0: DrawText( "Remove", x, y, s, textColor ); break;
-        case 1: DrawText( "Sand",        x, y, s, textColor ); break;
-        case 2: DrawText( "Water",       x, y, s, textColor ); break;
-        case 3: DrawText( "Fire",        x, y, s, textColor ); break;
-        case 4: DrawText( "Smoke",       x, y, s, textColor ); break;
-        case 5: DrawText( "Stone",       x, y, s, textColor ); break;
+        case 1: DrawText( "Sand",   x, y, s, textColor ); break;
+        case 2: DrawText( "Water",  x, y, s, textColor ); break;
+        case 3: DrawText( "Fire",   x, y, s, textColor ); break;
+        case 4: DrawText( "Smoke",  x, y, s, textColor ); break;
+        case 5: DrawText( "Stone",  x, y, s, textColor ); break;
         default: break;
     }
 

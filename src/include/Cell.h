@@ -20,6 +20,7 @@ typedef struct Cell {
     int life;
     int brightness;
     bool updated;
+    bool asleep;
 } Cell;
 
 typedef void (*CellUpdateFuncion)( Cell *grid, int row, int col, int rows, int cols, float delta );
@@ -31,3 +32,4 @@ void updateCell( Cell *grid, int row, int col, int rows, int cols, float delta )
 void drawCell( Cell *grid, int row, int col, int rows, int cols );
 
 void spawnCell( Cell *cell, CellType type );
+void wakeNeighbors( Cell *grid, int row, int col, int rows, int cols );

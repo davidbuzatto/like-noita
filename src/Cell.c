@@ -24,7 +24,7 @@ static bool moveDownRight( Cell *grid, int row, int col, int rows, int cols );
 
 static int computeFallSteps( Cell *cell, float delta );
 
-static void swapCell( Cell *grid, int pos1, int pos2 );
+static void swapCell( Cell *grid, int pos1, int pos2, int rows, int cols );
 static bool isCellPositionValid( int row, int col, int rows, int cols );
 
 static void drawSand( Cell *cell, int row, int col );
@@ -65,7 +65,7 @@ void updateCell( Cell *grid, int row, int col, int rows, int cols, float delta )
 
     Cell *cell = &grid[row * cols + col];
 
-    if ( cell->type != CELL_TYPE_EMPTY && !cell->updated ) {
+    if ( cell->type != CELL_TYPE_EMPTY && !cell->updated && !cell->asleep ) {
         cell->updated = true;
         updateTable[cell->type]( grid, row, col, rows, cols, delta );
     }
@@ -110,6 +110,7 @@ static void updateSand( Cell *grid, int row, int col, int rows, int cols, float 
     Cell *restingCell = &grid[row * cols + col];
     restingCell->vel.y = 0.0f;
     restingCell->subY = 0.0f;
+    restingCell->asleep = true;
     
 }
 
@@ -145,6 +146,7 @@ static void updateWater( Cell *grid, int row, int col, int rows, int cols, float
     Cell *restingCell = &grid[row * cols + col];
     restingCell->vel.y = 0.0f;
     restingCell->subY = 0.0f;
+    restingCell->asleep = true;
 
 }
 
@@ -200,7 +202,7 @@ static bool moveLeft( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -218,7 +220,7 @@ static bool moveRight( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -237,7 +239,7 @@ static bool moveUp( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -256,7 +258,7 @@ static bool moveUpLeft( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -275,7 +277,7 @@ static bool moveUpRight( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -294,7 +296,7 @@ static bool moveDown( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -313,7 +315,7 @@ static bool moveDownLeft( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -332,7 +334,7 @@ static bool moveDownRight( Cell *grid, int row, int col, int rows, int cols ) {
 
     if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
         if ( grid[nPos].type == CELL_TYPE_EMPTY ) {
-            swapCell( grid, pos, nPos );
+            swapCell( grid, pos, nPos, rows, cols );
             return true;
         }
     }
@@ -357,10 +359,15 @@ static int computeFallSteps( Cell *cell, float delta ) {
 
 }
 
-static void swapCell( Cell *grid, int pos1, int pos2 ) {
+static void swapCell( Cell *grid, int pos1, int pos2, int rows, int cols ) {
+
     Cell c = grid[pos1];
     grid[pos1] = grid[pos2];
     grid[pos2] = c;
+
+    wakeNeighbors( grid, pos1 / cols, pos1 % cols, rows, cols );
+    wakeNeighbors( grid, pos2 / cols, pos2 % cols, rows, cols );
+
 }
 
 static bool isCellPositionValid( int row, int col, int rows, int cols ) {
@@ -393,6 +400,7 @@ void spawnCell( Cell *cell, CellType type ) {
     cell->vel = (Vector2) { 0, 0 };
     cell->subY = 0;
     cell->brightness = GetRandomValue( -15, 15 );
+    cell->asleep = false;
 
     switch ( type ) {
         case CELL_TYPE_FIRE:
@@ -406,4 +414,16 @@ void spawnCell( Cell *cell, CellType type ) {
             break;
     }
 
+}
+
+void wakeNeighbors( Cell *grid, int row, int col, int rows, int cols ) {
+    for ( int dRow = -1; dRow <= 1; dRow++ ) {
+        for ( int dCol = -1; dCol <= 1; dCol++ ) {
+            int nRow = row + dRow;
+            int nCol = col + dCol;
+            if ( isCellPositionValid( nRow, nCol, rows, cols ) ) {
+                grid[nRow * cols + nCol].asleep = false;
+            }
+        }
+    }
 }
