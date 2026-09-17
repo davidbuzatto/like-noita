@@ -18,6 +18,7 @@ typedef struct Cell {
     Vector2 vel;
     float subY;    // frac. fall accumulator
     int life;
+    int maxLife;
     int brightness;
     bool updated;
     bool asleep;

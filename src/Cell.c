@@ -158,6 +158,7 @@ static void updateFire( Cell *grid, int row, int col, int rows, int cols, float 
     if ( cell->life <= 0 ) {
         cell->type = CELL_TYPE_SMOKE;
         cell->life = GetRandomValue( 150, 400 );
+        cell->maxLife = cell->life;
         cell->brightness = GetRandomValue( -15, 15 );
         return;
     }
@@ -383,7 +384,19 @@ static void drawWater( Cell *cell, int row, int col ) {
 }
 
 static void drawFire( Cell *cell, int row, int col ) {
-    DrawPixel( col, row, ColorBrightness( RED, cell->brightness / 100.0f ) );
+
+    float t = (float) cell->life / (float) cell->maxLife;
+    Color base;
+
+    if ( t > 0.5f ) {
+        // first half of life
+        base = ColorLerp( ORANGE, YELLOW, ( t - 0.5f ) / 0.5f );
+    } else {
+        base = ColorLerp( RED, ORANGE, t / 0.5f );
+    }
+
+    DrawPixel( col, row, ColorBrightness( base, cell->brightness / 100.0f ) );
+    
 }
 
 static void drawSmoke( Cell *cell, int row, int col ) {
@@ -413,6 +426,8 @@ void spawnCell( Cell *cell, CellType type ) {
             cell->life = 0;
             break;
     }
+
+    cell->maxLife = cell->life;
 
 }
 

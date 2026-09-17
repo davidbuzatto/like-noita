@@ -207,8 +207,8 @@ static void handleMouseInput( GameWorld *gw ) {
 
 static void drawHud( GameWorld *gw ) {
 
-    int x = 20;
-    int y = 20;
+    int x = 10;
+    int y = 10;
     int s = 20;
     Color textColor = RAYWHITE;
 
