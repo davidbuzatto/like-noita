@@ -41,26 +41,19 @@ GameWorld *createGameWorld( void ) {
         for ( int j = 0; j < size; j++ ) {
 
             int pos = i * gw->cols + j + m;
-            gw->grid[pos].type = CELL_TYPE_SAND;
-            gw->grid[pos].brightness = GetRandomValue( -15, 15 );
+            spawnCell( &gw->grid[pos], CELL_TYPE_SAND );
 
             pos += size * 2;
-            gw->grid[pos].type = CELL_TYPE_WATER;
-            gw->grid[pos].brightness = GetRandomValue( -15, 15 );
+            spawnCell( &gw->grid[pos], CELL_TYPE_WATER );
 
             pos += size * 2;
-            gw->grid[pos].type = CELL_TYPE_FIRE;
-            gw->grid[pos].life = GetRandomValue( 200, 500 );
-            gw->grid[pos].brightness = GetRandomValue( -15, 15 );
+            spawnCell( &gw->grid[pos], CELL_TYPE_FIRE );
 
             pos += size * 2;
-            gw->grid[pos].type = CELL_TYPE_SMOKE;
-            gw->grid[pos].life = GetRandomValue( 150, 400 );
-            gw->grid[pos].brightness = GetRandomValue( -15, 15 );
+            spawnCell( &gw->grid[pos], CELL_TYPE_SMOKE );
 
             pos += size * 2;
-            gw->grid[pos].type = CELL_TYPE_STONE;
-            gw->grid[pos].brightness = GetRandomValue( -15, 15 );
+            spawnCell( &gw->grid[pos], CELL_TYPE_STONE );
 
         }
 
@@ -71,8 +64,7 @@ GameWorld *createGameWorld( void ) {
         int m = 400;
         for ( int j = 0; j < size * 5; j++ ) {
             int pos = i * gw->cols + j + m;
-            gw->grid[pos].type = CELL_TYPE_STONE;
-            gw->grid[pos].brightness = GetRandomValue( -15, 15 );
+            spawnCell( &gw->grid[pos], CELL_TYPE_STONE );
         }
     }
 
@@ -100,11 +92,11 @@ void updateGameWorld( GameWorld *gw, float delta ) {
 
         if ( GetRandomValue( 0, 1 ) == 0 ) {
             for ( int col = 0; col < gw->cols; col++ ) {
-                updateCell( gw->grid, row, col, gw->rows, gw->cols );
+                updateCell( gw->grid, row, col, gw->rows, gw->cols, delta );
             }
         } else {
             for ( int col = gw->cols - 1; col >= 0; col-- ) {
-                updateCell( gw->grid, row, col, gw->rows, gw->cols );
+                updateCell( gw->grid, row, col, gw->rows, gw->cols, delta );
             }
         }
 

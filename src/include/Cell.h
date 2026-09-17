@@ -16,15 +16,18 @@ typedef enum CellType {
 typedef struct Cell {
     CellType type;
     Vector2 vel;
+    float subY;    // frac. fall accumulator
     int life;
     int brightness;
     bool updated;
 } Cell;
 
-typedef void (*CellUpdateFuncion)( Cell *grid, int row, int col, int rows, int cols );
+typedef void (*CellUpdateFuncion)( Cell *grid, int row, int col, int rows, int cols, float delta );
 typedef void (*CellDrawFuncion)( Cell *cell, int row, int col );
 typedef bool (*CellMoveFuncion)( Cell *grid, int row, int col, int rows, int cols );
 
 void resetCells( Cell *grid, int rows, int cols );
-void updateCell( Cell *grid, int row, int col, int rows, int cols );
+void updateCell( Cell *grid, int row, int col, int rows, int cols, float delta );
 void drawCell( Cell *grid, int row, int col, int rows, int cols );
+
+void spawnCell( Cell *cell, CellType type );

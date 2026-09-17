@@ -4,11 +4,14 @@
 
 #include "Cell.h"
 
-static void updateSand( Cell *grid, int row, int col, int rows, int cols );
-static void updateWater( Cell *grid, int row, int col, int rows, int cols );
-static void updateFire( Cell *grid, int row, int col, int rows, int cols );
-static void updateSmoke( Cell *grid, int row, int col, int rows, int cols );
-static void updateStone( Cell *grid, int row, int col, int rows, int cols );
+#define GRAVITY 800.0f
+#define MAX_FALL_SPEED 500.0f
+
+static void updateSand( Cell *grid, int row, int col, int rows, int cols, float delta );
+static void updateWater( Cell *grid, int row, int col, int rows, int cols, float delta );
+static void updateFire( Cell *grid, int row, int col, int rows, int cols, float delta );
+static void updateSmoke( Cell *grid, int row, int col, int rows, int cols, float delta );
+static void updateStone( Cell *grid, int row, int col, int rows, int cols, float delta );
 
 static bool moveLeft( Cell *grid, int row, int col, int rows, int cols );
 static bool moveRight( Cell *grid, int row, int col, int rows, int cols );
@@ -18,6 +21,8 @@ static bool moveUpRight( Cell *grid, int row, int col, int rows, int cols );
 static bool moveDown( Cell *grid, int row, int col, int rows, int cols );
 static bool moveDownLeft( Cell *grid, int row, int col, int rows, int cols );
 static bool moveDownRight( Cell *grid, int row, int col, int rows, int cols );
+
+static int computeFallSteps( Cell *cell, float delta );
 
 static void swapCell( Cell *grid, int pos1, int pos2 );
 static bool isCellPositionValid( int row, int col, int rows, int cols );
@@ -56,13 +61,13 @@ void resetCells( Cell *grid, int rows, int cols ) {
     }
 }
 
-void updateCell( Cell *grid, int row, int col, int rows, int cols ) {
+void updateCell( Cell *grid, int row, int col, int rows, int cols, float delta ) {
 
     Cell *cell = &grid[row * cols + col];
 
     if ( cell->type != CELL_TYPE_EMPTY && !cell->updated ) {
         cell->updated = true;
-        updateTable[cell->type]( grid, row, col, rows, cols );
+        updateTable[cell->type]( grid, row, col, rows, cols, delta );
     }
 
 }
@@ -77,21 +82,53 @@ void drawCell( Cell *grid, int row, int col, int rows, int cols ) {
 
 }
 
-static void updateSand( Cell *grid, int row, int col, int rows, int cols ) {
+static void updateSand( Cell *grid, int row, int col, int rows, int cols, float delta ) {
 
-    if ( moveDown( grid, row, col, rows, cols ) ) return;
+    Cell *cell = &grid[row * cols + col];
+    int steps = computeFallSteps( cell, delta );
 
+    int movedCount = 0;
+    for ( int i = 0; i < steps; i++ ) {
+        if ( moveDown( grid, row, col, rows, cols ) ) {
+            row++;
+            movedCount++;
+        } else {
+            break;
+        }
+    }
+
+    if ( movedCount == steps ) return; // doesn't hit anything
+
+    // hit something, tries the diagonals
     if ( GetRandomValue( 0, 1 ) == 0 ) {
         if ( moveDownLeft( grid, row, col, rows, cols ) ) return;
     } else {
         if ( moveDownRight( grid, row, col, rows, cols ) ) return;
     }
+
+    // stopped
+    Cell *restingCell = &grid[row * cols + col];
+    restingCell->vel.y = 0.0f;
+    restingCell->subY = 0.0f;
     
 }
 
-static void updateWater( Cell *grid, int row, int col, int rows, int cols ) {
+static void updateWater( Cell *grid, int row, int col, int rows, int cols, float delta ) {
     
-    if ( moveDown( grid, row, col, rows, cols ) ) return;
+    Cell *cell = &grid[row * cols + col];
+    int steps = computeFallSteps( cell, delta );
+
+    int movedCount = 0;
+    for ( int i = 0; i < steps; i++ ) {
+        if ( moveDown( grid, row, col, rows, cols ) ) {
+            row++;
+            movedCount++;
+        } else {
+            break;
+        }
+    }
+
+    if ( movedCount == steps ) return;
 
     if ( GetRandomValue( 0, 1 ) == 0 ) {
         if ( moveDownLeft( grid, row, col, rows, cols ) ) return;
@@ -105,9 +142,13 @@ static void updateWater( Cell *grid, int row, int col, int rows, int cols ) {
         if ( moveRight( grid, row, col, rows, cols ) ) return;
     }
 
+    Cell *restingCell = &grid[row * cols + col];
+    restingCell->vel.y = 0.0f;
+    restingCell->subY = 0.0f;
+
 }
 
-static void updateFire( Cell *grid, int row, int col, int rows, int cols ) {
+static void updateFire( Cell *grid, int row, int col, int rows, int cols, float delta ) {
     
     Cell *cell = &grid[row * cols + col];
     cell->life--;
@@ -121,7 +162,7 @@ static void updateFire( Cell *grid, int row, int col, int rows, int cols ) {
 
 }
 
-static void updateSmoke( Cell *grid, int row, int col, int rows, int cols ) {
+static void updateSmoke( Cell *grid, int row, int col, int rows, int cols, float delta ) {
     
     Cell *cell = &grid[row * cols + col];
     cell->life--;
@@ -145,7 +186,7 @@ static void updateSmoke( Cell *grid, int row, int col, int rows, int cols ) {
 
 }
 
-static void updateStone( Cell *grid, int row, int col, int rows, int cols ) {
+static void updateStone( Cell *grid, int row, int col, int rows, int cols, float delta ) {
     // do nothing!
 }
 
@@ -300,6 +341,22 @@ static bool moveDownRight( Cell *grid, int row, int col, int rows, int cols ) {
 
 }
 
+static int computeFallSteps( Cell *cell, float delta ) {
+
+    cell->vel.y += GRAVITY * delta;
+    if ( cell->vel.y > MAX_FALL_SPEED ) {
+        cell->vel.y = MAX_FALL_SPEED;
+    }
+
+    cell->subY += cell->vel.y * delta;
+
+    int steps = (int) cell->subY;
+    cell->subY -= steps;
+
+    return steps;
+
+}
+
 static void swapCell( Cell *grid, int pos1, int pos2 ) {
     Cell c = grid[pos1];
     grid[pos1] = grid[pos2];
@@ -328,4 +385,25 @@ static void drawSmoke( Cell *cell, int row, int col ) {
 
 static void drawStone( Cell *cell, int row, int col ) {
     DrawPixel( col, row, ColorBrightness( DARKGRAY, cell->brightness / 100.0f ) );
+}
+
+void spawnCell( Cell *cell, CellType type ) {
+
+    cell->type = type;
+    cell->vel = (Vector2) { 0, 0 };
+    cell->subY = 0;
+    cell->brightness = GetRandomValue( -15, 15 );
+
+    switch ( type ) {
+        case CELL_TYPE_FIRE:
+            cell->life = GetRandomValue( 200, 500 );
+            break;
+        case CELL_TYPE_SMOKE:
+            cell->life = GetRandomValue( 150, 400 );
+            break;
+        default:
+            cell->life = 0;
+            break;
+    }
+
 }
