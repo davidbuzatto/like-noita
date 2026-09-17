@@ -1,1 +1,1 @@
-Cellular automata like Noita.
+Simple simulator like the game Noita.

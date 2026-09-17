@@ -1,8 +1,7 @@
 /**
  * @file main.c
  * @author Prof. Dr. David Buzatto
- * @brief Main function and logic for the game. Base template for game
- * development in C using Raylib (https://www.raylib.com/).
+ * @brief Simple particle simulator "Like" the game Noita.
  * 
  * @copyright Copyright (c) 2026
  */

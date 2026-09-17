@@ -184,6 +184,7 @@ static void handleMouseInput( GameWorld *gw ) {
 
             int pos = row * gw->cols + col;
 
+            // clean
             if ( gw->selectedType == CELL_TYPE_EMPTY ) {
                 gw->grid[pos].type = CELL_TYPE_EMPTY;
                 wakeNeighbors( gw->grid, row, col, gw->rows, gw->cols );
