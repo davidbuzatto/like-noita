@@ -10,9 +10,14 @@
 #include "Cell.h"
 
 typedef struct GameWorld {
+
     int rows;
     int cols;
     Cell *grid;
+
+    CellType selectedType;
+    int brushRadius;
+
 } GameWorld;
 
 /**
